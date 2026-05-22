@@ -1,0 +1,33 @@
+/*
+ * MemoriX — Content Overlay CSS
+ * Injected alongside content-script.js into all supported host pages.
+ *
+ * Rules here are intentionally minimal and scoped to [id^="memorix-"]
+ * to avoid bleeding into host-page styles.
+ * The save-confirmation toast uses inline styles for maximum isolation,
+ * but any future DOM components should use these scoped classes.
+ */
+
+/* ── Reset scope ─────────────────────────────────────────────────────────── */
+
+[id^="memorix-"],
+[class^="memorix-"] {
+  all: initial; /* Hard reset — inherit nothing from host page */
+  box-sizing: border-box;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Utility: visually hidden (accessibility) ────────────────────────────── */
+
+.memorix-sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0,0,0,0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}

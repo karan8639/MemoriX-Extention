@@ -1,0 +1,181 @@
+/**
+ * MemoriX Content Overlay CSS
+ * 
+ * Styles for UI overlays injected into web pages.
+ * Used for highlighting code blocks and related snippets.
+ */
+
+/* ── MemoriX Code Highlight Overlay ──────────────────────────────────────── */
+.memorix-highlight {
+  outline: 2px solid #2dff9a;
+  outline-offset: 2px;
+  background: rgba(45, 255, 154, 0.05);
+  transition: outline-color 150ms ease, background-color 150ms ease;
+  cursor: pointer;
+}
+
+.memorix-highlight:hover {
+  outline-color: #5affa8;
+  background: rgba(45, 255, 154, 0.12);
+}
+
+/* ── MemoriX Snippet Badge ──────────────────────────────────────────────── */
+.memorix-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #0b0e0f;
+  border: 1px solid #2dff9a;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: #2dff9a;
+  font-weight: 600;
+  z-index: 10000;
+  box-shadow: 0 0 8px rgba(45, 255, 154, 0.25);
+  cursor: pointer;
+  user-select: none;
+  transition: all 150ms ease;
+}
+
+.memorix-badge:hover {
+  background: rgba(45, 255, 154, 0.1);
+  transform: scale(1.05);
+}
+
+/* ── MemoriX Tooltip ──────────────────────────────────────────────────────── */
+.memorix-tooltip {
+  position: fixed;
+  background: #111517;
+  border: 1px solid #2dff9a;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  color: #e8ecea;
+  z-index: 10001;
+  max-width: 280px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  animation: fadeIn 150ms ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.memorix-tooltip-header {
+  font-weight: 600;
+  color: #1adb80;
+  margin-bottom: 4px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+}
+
+.memorix-tooltip-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 4px;
+}
+
+.memorix-tooltip-tag {
+  font-size: 9px;
+  padding: 1px 4px;
+  background: rgba(45, 255, 154, 0.1);
+  border: 0.5px solid rgba(45, 255, 154, 0.3);
+  border-radius: 2px;
+  color: #1adb80;
+  font-weight: 500;
+}
+
+/* ── MemoriX Popup Portal ──────────────────────────────────────────────────── */
+.memorix-portal {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 320px;
+  max-height: 400px;
+  background: #111517;
+  border: 1px solid #2dff9a;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(45, 255, 154, 0.15);
+  z-index: 10002;
+  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  animation: slideUp 200ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.memorix-portal-header {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+  color: #e8ecea;
+  font-size: 12px;
+}
+
+.memorix-portal-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.memorix-portal-icon {
+  width: 16px;
+  height: 16px;
+  background: #2dff9a;
+  border-radius: 3px;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  color: #000;
+  font-weight: 700;
+}
+
+.memorix-portal-close {
+  background: none;
+  border: none;
+  color: #7a8e8a;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+  transition: color 150ms ease;
+}
+
+.memorix-portal-close:hover {
+  color: #e8ecea;
+}
+
+.memorix-portal-content {
+  padding: 10px 12px;
+  font-size: 12px;
+  color: #7a8e8a;
+  line-height: 1.5;
+}
+
+/* ── Dark Mode Compatibility ─────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  .memorix-highlight {
+    outline-color: #2dff9a;
+  }
+}
+
+/* ── Print Hide ──────────────────────────────────────────────────────────── */
+@media print {
+  .memorix-highlight,
+  .memorix-badge,
+  .memorix-tooltip,
+  .memorix-portal {
+    display: none !important;
+  }
+}

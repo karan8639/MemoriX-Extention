@@ -1,0 +1,187 @@
+{
+  "manifest_version": 3,
+  "name": "MemoriX",
+  "short_name": "MemoriX",
+  "version": "0.1.0",
+  "description": "Local-first developer memory: smart code snippets and one-click project matching — all private, all yours.",
+
+  "author": "MemoriX",
+  "homepage_url": "https://memorix.dev",
+
+  "icons": {
+    "16":  "public/icons/icon16.png",
+    "32":  "public/icons/icon32.png",
+    "48":  "public/icons/icon48.png",
+    "128": "public/icons/icon128.png"
+  },
+
+  "action": {
+    "default_popup": "popup/index.html",
+    "default_icon": {
+      "16":  "public/icons/icon16.png",
+      "32":  "public/icons/icon32.png",
+      "48":  "public/icons/icon48.png",
+      "128": "public/icons/icon128.png"
+    },
+    "default_title": "MemoriX — Your local dev memory"
+  },
+
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+
+  "content_scripts": [
+    {
+      "_comment": "GitHub — file viewer, PR diffs, code search, Gist",
+      "matches": [
+        "https://github.com/*",
+        "https://gist.github.com/*"
+      ],
+      "js": ["content/content-script.js"],
+      "css": ["content/content-overlay.css"],
+      "run_at": "document_idle",
+      "all_frames": false
+    },
+    {
+      "_comment": "GitLab SaaS and common self-hosted patterns",
+      "matches": [
+        "https://gitlab.com/*",
+        "https://*.gitlab.com/*"
+      ],
+      "js": ["content/content-script.js"],
+      "css": ["content/content-overlay.css"],
+      "run_at": "document_idle",
+      "all_frames": false
+    },
+    {
+      "_comment": "VS Code for the Web (vscode.dev + github.dev)",
+      "matches": [
+        "https://vscode.dev/*",
+        "https://*.vscode.dev/*",
+        "https://github.dev/*"
+      ],
+      "js": ["content/content-script.js"],
+      "css": ["content/content-overlay.css"],
+      "run_at": "document_idle",
+      "all_frames": false
+    },
+    {
+      "_comment": "CodePen, JSFiddle, StackBlitz — in-browser editors",
+      "matches": [
+        "https://codepen.io/*",
+        "https://jsfiddle.net/*",
+        "https://stackblitz.com/*",
+        "https://*.stackblitz.io/*"
+      ],
+      "js": ["content/content-script.js"],
+      "css": ["content/content-overlay.css"],
+      "run_at": "document_idle",
+      "all_frames": false
+    },
+    {
+      "_comment": "Replit in-browser IDE",
+      "matches": [
+        "https://replit.com/*",
+        "https://*.repl.co/*"
+      ],
+      "js": ["content/content-script.js"],
+      "css": ["content/content-overlay.css"],
+      "run_at": "document_idle",
+      "all_frames": false
+    },
+    {
+      "_comment": "npm, MDN, DevDocs — documentation sources",
+      "matches": [
+        "https://www.npmjs.com/*",
+        "https://developer.mozilla.org/*",
+        "https://devdocs.io/*"
+      ],
+      "js": ["content/content-script.js"],
+      "css": ["content/content-overlay.css"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "contextMenus",
+    "alarms",
+    "sidePanel"
+  ],
+
+  "host_permissions": [
+    "https://github.com/*",
+    "https://gist.github.com/*",
+    "https://gitlab.com/*",
+    "https://*.gitlab.com/*",
+    "https://vscode.dev/*",
+    "https://*.vscode.dev/*",
+    "https://github.dev/*",
+    "https://codepen.io/*",
+    "https://jsfiddle.net/*",
+    "https://stackblitz.com/*",
+    "https://*.stackblitz.io/*",
+    "https://replit.com/*",
+    "https://*.repl.co/*",
+    "https://www.npmjs.com/*",
+    "https://developer.mozilla.org/*",
+    "https://devdocs.io/*"
+  ],
+
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+
+  "commands": {
+    "open-scratchpad": {
+      "suggested_key": {
+        "default":  "Ctrl+Shift+M",
+        "mac":      "Command+Shift+M"
+      },
+      "description": "Open the MemoriX scratchpad popup"
+    },
+    "trigger-relate": {
+      "suggested_key": {
+        "default":  "Ctrl+Shift+R",
+        "mac":      "Command+Shift+R"
+      },
+      "description": "Run One-Click Relate on the current page context"
+    }
+  },
+
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "public/icons/*",
+        "content/content-overlay.css",
+        "assets/*"
+      ],
+      "matches": [
+        "https://github.com/*",
+        "https://gist.github.com/*",
+        "https://gitlab.com/*",
+        "https://*.gitlab.com/*",
+        "https://vscode.dev/*",
+        "https://*.vscode.dev/*",
+        "https://github.dev/*",
+        "https://codepen.io/*",
+        "https://jsfiddle.net/*",
+        "https://stackblitz.com/*",
+        "https://*.stackblitz.io/*",
+        "https://replit.com/*",
+        "https://*.repl.co/*",
+        "https://www.npmjs.com/*",
+        "https://developer.mozilla.org/*",
+        "https://devdocs.io/*"
+      ]
+    }
+  ],
+
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
+  }
+}
