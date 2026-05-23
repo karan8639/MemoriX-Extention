@@ -158,7 +158,8 @@
       "resources": [
         "public/icons/*",
         "content/content-overlay.css",
-        "assets/*"
+        "assets/*",
+        "background/vector-worker.js"
       ],
       "matches": [
         "https://github.com/*",

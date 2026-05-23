@@ -8,11 +8,16 @@
  *  - Keyboard command routing
  *  - Message broker between content scripts ↔ popup / sidepanel
  *  - Alarm scheduling for deferred index maintenance
+ *  - Vector embedding queue orchestration
  *
  * PRIVACY GUARANTEE:
  *  This worker makes zero external network requests.
- *  All data operations route through chrome.storage.local only.
+ *  All data operations route through chrome.storage.local / IndexedDB only.
  */
+
+// Import new storage and vector systems
+import { storage } from '../core/storage-v2.js';
+import { vectorQueueOrchestrator } from '../core/vectorQueueOrchestrator.js';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -70,6 +75,16 @@ chrome.runtime.onInstalled.addListener(async ({ reason, previousVersion }) => {
 
 chrome.runtime.onStartup.addListener(async () => {
   log("info", `onStartup · browser launched · v${EXT_VERSION}`);
+  
+  // Initialize storage engine and vector orchestrator
+  try {
+    await storage.init();
+    vectorQueueOrchestrator.start();
+    log("info", "Storage engine and vector orchestrator initialized");
+  } catch (e) {
+    log("error", "Failed to initialize storage/vector systems:", e);
+  }
+  
   // Context menus persist across updates but not across browser profiles
   // Re-register defensively on every startup
   await registerContextMenus();
@@ -79,6 +94,9 @@ chrome.runtime.onStartup.addListener(async () => {
 
 async function handleFreshInstall() {
   log("info", "Fresh install — seeding default settings");
+
+  // Initialize storage engine
+  await storage.init();
 
   const defaultSettings = {
     version:          EXT_VERSION,
@@ -97,6 +115,10 @@ async function handleFreshInstall() {
   });
 
   log("info", "Default settings written to chrome.storage.local");
+
+  // Start vector orchestrator
+  vectorQueueOrchestrator.start();
+}
 
   // Open onboarding tab on first install
   chrome.tabs.create({ url: "https://memorix.dev/welcome?ref=extension" });
@@ -244,15 +266,60 @@ async function handleMessage(action, payload, sender) {
     }
 
     case MSG.SNIPPET_SAVE: {
-      log("info", "SNIPPET_SAVE received — routing to storage layer");
-      // TODO: delegate to core/storage.js saveSnippet() once implemented
-      return { ok: true, status: "queued" };
+      log("info", "SNIPPET_SAVE received — saving to storage engine");
+      const { title, code, sourceUrl, sourceTitle, tags } = payload ?? {};
+      
+      if (!code || !code.trim()) {
+        return { ok: false, error: "No code provided" };
+      }
+      
+      try {
+        const snippetId = await storage.saveSnippet(
+          {
+            title: title?.trim() ?? "Untitled",
+            code: code.trim(),
+            tags: tags || [],
+            sourceUrl: sourceUrl || null,
+            sourceTitle: sourceTitle || null,
+          },
+          true // queueVectorComputation = true
+        );
+        
+        log("info", `Snippet saved with ID: ${snippetId}`);
+        return { ok: true, snippetId, status: "saved" };
+      } catch (e) {
+        log("error", "Failed to save snippet:", e);
+        return { ok: false, error: e.message };
+      }
     }
 
     case MSG.TRIGGER_RELATE: {
-      log("info", "TRIGGER_RELATE received — routing to relate engine");
-      // TODO: delegate to core/relate.js once implemented
-      return { ok: true, status: "queued" };
+      log("info", "TRIGGER_RELATE received — queuing vector computation");
+      const { code } = payload ?? {};
+      
+      if (code && code.trim()) {
+        try {
+          // Save a temporary snippet with vector computation queued
+          const snippetId = await storage.saveSnippet(
+            {
+              uuid: `relate_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+              title: "[Relate Query]",
+              code: code,
+              tags: [],
+              sourceUrl: null,
+              sourceTitle: null,
+            },
+            true // queueVectorComputation = true
+          );
+          
+          return { ok: true, status: "queued", snippetId };
+        } catch (e) {
+          log("error", "Failed to queue relate:", e);
+          return { ok: false, error: e.message };
+        }
+      }
+      
+      return { ok: false, error: "No code provided for relate" };
     }
 
     default:

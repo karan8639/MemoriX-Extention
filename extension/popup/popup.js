@@ -14,6 +14,65 @@
 
 "use strict";
 
+// ─── Browser/Testing Mock ───────────────────────────────────────────────────
+if (typeof chrome === "undefined" || !chrome.storage) {
+  console.warn("[MemoriX] Chrome APIs not found. Injecting mocks for testing...");
+  window.chrome = {
+    storage: {
+      local: {
+        _data: JSON.parse(localStorage.getItem("mx_mock_storage") || "{}"),
+        get(key, cb) {
+          const res = {};
+          if (Array.isArray(key)) {
+            key.forEach(k => res[k] = this._data[k]);
+          } else {
+            res[key] = this._data[key];
+          }
+          setTimeout(() => cb(res), 10);
+        },
+        set(data, cb) {
+          Object.assign(this._data, data);
+          localStorage.setItem("mx_mock_storage", JSON.stringify(this._data));
+          if (cb) setTimeout(cb, 10);
+        },
+        remove(key, cb) {
+          delete this._data[key];
+          localStorage.setItem("mx_mock_storage", JSON.stringify(this._data));
+          if (cb) setTimeout(cb, 10);
+        },
+        clear(cb) {
+          this._data = {};
+          localStorage.removeItem("mx_mock_storage");
+          if (cb) setTimeout(cb, 10);
+        },
+        getBytesInUse(key, cb) {
+          setTimeout(() => cb(JSON.stringify(this._data).length), 10);
+        }
+      }
+    },
+    runtime: {
+      lastError: null,
+      getURL: (path) => path,
+      onMessage: { 
+        addListener: () => {},
+        removeListener: () => {}
+      },
+      sendMessage: (msg, cb) => {
+        console.log("[Mock] sendMessage:", msg);
+        if (cb) setTimeout(() => cb({ ok: true, status: "ok" }), 10);
+      }
+    },
+    action: {
+      setBadgeBackgroundColor: () => {},
+      setBadgeTextColor: () => {}
+    },
+    tabs: {
+      query: (opts, cb) => cb([{ id: 1, url: "http://localhost" }]),
+      sendMessage: (id, msg, cb) => cb({ status: "ok" })
+    }
+  };
+}
+
 // ─── Storage Keys ─────────────────────────────────────────────────────────────
 
 const STORAGE_KEYS = {
@@ -299,6 +358,16 @@ function render() {
   renderTagFilterRow();
   renderSnippetList();
   renderStorageBar();
+  renderAddPanel();
+}
+
+function renderAddPanel() {
+  const el = document.getElementById("add-panel");
+  if (state.addPanelOpen) {
+    el.classList.remove("collapsed");
+  } else {
+    el.classList.add("collapsed");
+  }
 }
 
 function renderSnippetCount() {
